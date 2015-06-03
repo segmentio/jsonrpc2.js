@@ -1,0 +1,17 @@
+{
+  "name": "jsonrpc2",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bluebird": "~2.9.25",
+    "superagent": "~1.2.0",
+    "uid2": "0.0.3"
+  },
+  "registry": "https://segmentio.registry.nodejitsu.com",
+  "author": "",
+  "license": "ISC"
+}
