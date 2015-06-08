@@ -2,6 +2,16 @@ var request = require('superagent');
 var co = require('co');
 var uid = require('uid2');
 
+/**
+ * Exports.
+ */
+
+module.exports = Client;
+
+/**
+ * Client.
+ */
+
 function Client(addr) {
   this.addr = addr;
 }
