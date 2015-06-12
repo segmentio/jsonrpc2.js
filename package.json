@@ -1,6 +1,6 @@
 {
-  "name": "jsonrpc2",
-  "version": "0.0.0",
+  "name": "s-jsonrpc2",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,9 @@
   "devDependencies": {
     "co": "^4.5.4"
   },
-  "registry": "https://segmentio.registry.nodejitsu.com",
+  "publishConfig": {
+    "registry": "https://segmentio.registry.nodejitsu.com"
+  },
   "author": "",
   "license": "ISC"
 }
