@@ -1,5 +1,4 @@
 var request = require('superagent');
-var co = require('co');
 var uid = require('uid2');
 
 /**
@@ -34,7 +33,8 @@ Client.prototype.call = function(method, params) {
   };
 
   return new Promise(function(resolve, reject){
-    request('POST', self.addr)
+    request
+      .post(self.addr)
       .send(req)
       .set({ 'Content-Type': 'application/json'})
       .end(function(err, res){
