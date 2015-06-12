@@ -8,8 +8,11 @@
   },
   "dependencies": {
     "bluebird": "~2.9.25",
-    "superagent": "~1.2.0",
+    "request": "^2.57.0",
     "uid2": "0.0.3"
+  },
+  "devDependencies": {
+    "co": "^4.5.4"
   },
   "registry": "https://segmentio.registry.nodejitsu.com",
   "author": "",

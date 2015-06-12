@@ -1,4 +1,4 @@
-var request = require('superagent');
+var request = require('request');
 var uid = require('uid2');
 
 /**
@@ -33,13 +33,14 @@ Client.prototype.call = function(method, params) {
   };
 
   return new Promise(function(resolve, reject){
-    request
-      .post(self.addr)
-      .send(req)
-      .set({ 'Content-Type': 'application/json'})
-      .end(function(err, res){
-        if (err) return reject(err);
-        resolve(res.body.result);
-      });
+    request.post({
+      uri: self.addr,
+      method: 'POST',
+      json: true,
+      body: req
+    }, function(err, res, body){
+      if (err) return reject(err);
+      resolve(body.result);
+    });
   })
 }
