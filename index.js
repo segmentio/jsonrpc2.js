@@ -39,6 +39,7 @@ Client.prototype.call = function(method, params) {
       json: true,
       body: req
     }, function(err, res, body){
+      err = err || body.error;
       if (err) return reject(err);
       resolve(body.result);
     });
