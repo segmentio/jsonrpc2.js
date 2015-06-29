@@ -40,7 +40,7 @@ Client.prototype.call = function(method, params) {
       body: req
     }, function(err, res, body){
       err = err || body.error && new Error(body.error);
-      if (err) return reject(err);
+      if (err && err.message != 'not found') return reject(err);
       resolve(body.result);
     });
   })
