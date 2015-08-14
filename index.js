@@ -40,7 +40,7 @@ Client.prototype.call = function(method, params) {
     json: true,
     method: 'POST',
     uri: this.addr,
-    timeout: this.timeout
+    timeout: this.timeout,
     body: body
   };
 
