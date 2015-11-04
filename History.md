@@ -1,4 +1,9 @@
 
+0.2.0 / 2015-11-04
+==================
+
+  * handle error objects, which are correct according to the spec
+
 0.1.1 / 2015-08-14
 ==================
 
