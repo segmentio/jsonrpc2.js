@@ -53,7 +53,7 @@ Client.prototype.call = function(method, params) {
       }
       if (body.error) {
         if (typeof body.error === 'object') {
-          let err = new Error(body.error.message);
+          var err = new Error(body.error.message);
           err.code = body.error.code;
           err.data = body.error.data;
           return reject(err);
