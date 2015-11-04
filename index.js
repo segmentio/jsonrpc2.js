@@ -29,8 +29,8 @@ function Client(addr, opts) {
  * @return {Promise}
  */
 
-Client.prototype.call = function(method, params) {  
-  var body = { 
+Client.prototype.call = function(method, params) {
+  var body = {
     method: method,
     params: params,
     id: uid(16)
@@ -47,12 +47,21 @@ Client.prototype.call = function(method, params) {
   return new Promise(function(resolve, reject){
     request.post(opts, function(err, res, body){
       body = body || {}
-      
+
       if (err) {
         return reject(err);
       }
-      if (body.error && 'not found' != body.error) {
-        return reject(new Error(body.error));
+      if (body.error) {
+        if (typeof body.error === 'object') {
+          let err = new Error(body.error.message);
+          err.code = body.error.code;
+          err.data = body.error.data;
+          return reject(err);
+        }
+
+        if ('not found' != body.error) {
+          return reject(new Error(body.error));
+        }
       }
 
       return resolve(body.result);
