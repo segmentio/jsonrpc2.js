@@ -1,3 +1,4 @@
+var debug = require('debug')('@segment/jsonrpc2');
 var request = require('request');
 var uid = require('uid2');
 
@@ -30,11 +31,15 @@ function Client(addr, opts) {
  */
 
 Client.prototype.call = function(method, params) {
+  var id = uid(16);
+
   var body = {
     method: method,
     params: params,
-    id: uid(16)
+    id: id
   };
+
+  debug('call %s(%s) :: %s', method, params, id);
 
   var opts = {
     json: true,
@@ -49,6 +54,7 @@ Client.prototype.call = function(method, params) {
       body = body || {}
 
       if (err) {
+        debug('error for %s: %s', id, err.message)
         return reject(err);
       }
       if (body.error) {
@@ -56,14 +62,17 @@ Client.prototype.call = function(method, params) {
           var err = new Error(body.error.message);
           err.code = body.error.code;
           err.data = body.error.data;
+          debug('error for %s: %s', id, err.message)
           return reject(err);
         }
 
         if ('not found' != body.error) {
+          debug('error for %s: %s', id, body.error)
           return reject(new Error(body.error));
         }
       }
 
+      debug('success %s: %s', id, err.message)
       return resolve(body.result);
     });
   });
