@@ -72,7 +72,7 @@ Client.prototype.call = function(method, params) {
         }
       }
 
-      debug('success %s: %s', id, err.message)
+      debug('success %s: %s', id, body.result || {})
       return resolve(body.result);
     });
   });
