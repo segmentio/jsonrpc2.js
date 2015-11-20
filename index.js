@@ -39,7 +39,7 @@ Client.prototype.call = function(method, params) {
     id: id
   };
 
-  debug('call %s(%s) :: %s', method, params, id);
+  debug('call %s(%j) :: %s', method, params, id);
 
   var opts = {
     json: true,
@@ -72,7 +72,7 @@ Client.prototype.call = function(method, params) {
         }
       }
 
-      debug('success %s: %s', id, err.message)
+      debug('success %s: %j', id, body.result || {})
       return resolve(body.result);
     });
   });
