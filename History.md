@@ -1,4 +1,10 @@
 
+0.2.3 / 2015-11-20
+==================
+
+  * fix: broken debug on successful call
+  * tests: added them
+
 0.2.2 / 2015-11-20
 ==================
 
