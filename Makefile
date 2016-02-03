@@ -1,6 +1,13 @@
 
 BIN := node_modules/.bin
 
+NODE ?= node
+NODE_FLAGS += --harmony_destructuring
+MOCHA_FLAGS ?= 
+
+SRC := index.js
+TESTS := $(wildcard test/*.js)
+
 .DEFAULT_GOAL := test
 
 node_modules: package.json
@@ -8,6 +15,15 @@ node_modules: package.json
 	@touch $@
 
 test: node_modules
-	$(BIN)/mocha --bail --require co-mocha
+	$(BIN)/mocha $(NODE_FLAGS) $(MOCHA_FLAGS)
 
-.PHONY: test
+lint: node_modules
+	$(BIN)/eslint .
+
+coverage: $(SRC) $(TESTS) node_modules
+	$(NODE) $(NODE_FLAGS) $(BIN)/istanbul cover $(BIN)/_mocha $(MOCHA_FLAGS)
+
+clean:
+	rm -rf coverage
+
+.PHONY: test lint clean

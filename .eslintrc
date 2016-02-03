@@ -1,0 +1,16 @@
+{
+  "extends": "segment/node",
+  "ecmaFeatures": {
+    "templateStrings": true,
+    "arrowFunctions": true,
+    "destructuring": true,
+    "blockBindings": true,
+    "generators": true,
+    "spread": true,
+    "experimentalObjectRestSpread": true
+  },
+  "rules": {
+    "max-len": 0,
+    "no-undef": 2
+  }
+}
