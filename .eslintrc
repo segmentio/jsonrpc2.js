@@ -8,9 +8,5 @@
     "generators": true,
     "spread": true,
     "experimentalObjectRestSpread": true
-  },
-  "rules": {
-    "max-len": 0,
-    "no-undef": 2
   }
 }
