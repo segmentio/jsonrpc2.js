@@ -54,14 +54,14 @@ Client.prototype.call = function(method, params) {
     body: body
   };
 
-  return function(done) {
+  return new Promise(function(resolve, reject) {
     debug('request %j', body);
     request.post(opts, function(err, res, body) {
       body = body || {};
 
       if (err) {
         debug('error for %s: %s', id, err.message);
-        return done(err);
+        return reject(err);
       }
 
       if (body.error) {
@@ -70,18 +70,18 @@ Client.prototype.call = function(method, params) {
           e.code = body.error.code;
           e.data = body.error.data;
           debug('error for %s: %s', id, e.message);
-          return done(e);
+          return reject(e);
         }
 
         // XXX: why do we do this?
         if (body.error != 'not found') {
           debug('error for %s: %s', id, body.error);
-          return done(new Error(body.error));
+          return reject(new Error(body.error));
         }
       }
 
       debug('success %s: %j', id, body.result || {});
-      return done(null, body.result);
+      return resolve(body.result);
     });
-  };
+  });
 };
