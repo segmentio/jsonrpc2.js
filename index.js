@@ -34,7 +34,7 @@ function Client(addr, opts) {
  *
  * @param {String} method
  * @param {String} params
- * @return {Function} thunk
+ * @return {Promise}
  */
 
 Client.prototype.call = function(method, params) {
