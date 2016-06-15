@@ -43,6 +43,11 @@ describe('jsonrpc2', function() {
     assert.deepEqual(res.params, [ true ]);
   });
 
+  it('should allow a non-array for a single param', function*() {
+    const res = yield client.call('echo', true);
+    assert.deepEqual(res.params, [ true ]);
+  });
+
   describe('when the request fails', function() {
     it('should throw', function*() {
       let err = null;

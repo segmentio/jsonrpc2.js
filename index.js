@@ -43,7 +43,7 @@ Client.prototype.call = function(method, params, options) {
   const id = options.async ? null : uid(16);
   const body = {
     method: method,
-    params: params,
+    params: Array.isArray(params) ? params : [ params ],
     id: id,
     jsonrpc: '2.0' // http://www.jsonrpc.org/specification
   };

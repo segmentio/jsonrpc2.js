@@ -14,8 +14,7 @@ Available `opts`:
 
 ### Client#call(method, params, [options])
 
-Calls the given `method` with the given `params`. (make sure you set `params` as an array
-of arguments)
+Calls the given `method` with the given `params`. (if not an array, it will be converted)
 
 Available `options`:
  - `timeout` override the default client timeout
