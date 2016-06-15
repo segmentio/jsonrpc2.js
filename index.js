@@ -1,6 +1,13 @@
-var debug = require('debug')('@segment/jsonrpc2');
-var request = require('request');
-var uid = require('uid2');
+
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+
+const debug = require('debug')('jsonrpc2');
+const request = require('request');
+const uid = require('uid2');
 
 /**
  * Exports.
@@ -31,17 +38,15 @@ function Client(addr, opts) {
  */
 
 Client.prototype.call = function(method, params) {
-  var id = uid(16);
-
-  var body = {
+  const id = uid(16);
+  const body = {
     method: method,
     params: params,
-    id: id
+    id: id,
+    jsonrpc: '2.0' // http://www.jsonrpc.org/specification
   };
 
-  debug('call %s(%j) :: %s', method, params, id);
-
-  var opts = {
+  const opts = {
     json: true,
     method: 'POST',
     uri: this.addr,
@@ -49,31 +54,34 @@ Client.prototype.call = function(method, params) {
     body: body
   };
 
-  return new Promise(function(resolve, reject){
-    request.post(opts, function(err, res, body){
-      body = body || {}
+  return new Promise(function(resolve, reject) {
+    debug('request %j', body);
+    request.post(opts, function(err, res, body) {
+      body = body || {};
 
       if (err) {
-        debug('error for %s: %s', id, err.message)
+        debug('error for %s: %s', id, err.message);
         return reject(err);
       }
+
       if (body.error) {
         if (typeof body.error === 'object') {
-          var err = new Error(body.error.message);
-          err.code = body.error.code;
-          err.data = body.error.data;
-          debug('error for %s: %s', id, err.message)
-          return reject(err);
+          const e = new Error(body.error.message);
+          e.code = body.error.code;
+          e.data = body.error.data;
+          debug('error for %s: %s', id, e.message);
+          return reject(e);
         }
 
-        if ('not found' != body.error) {
-          debug('error for %s: %s', id, body.error)
+        // XXX: why do we do this?
+        if (body.error != 'not found') {
+          debug('error for %s: %s', id, body.error);
           return reject(new Error(body.error));
         }
       }
 
-      debug('success %s: %j', id, body.result || {})
+      debug('success %s: %j', id, body.result || {});
       return resolve(body.result);
     });
   });
-}
+};
