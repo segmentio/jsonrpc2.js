@@ -2,6 +2,8 @@
 
 > A [JSON-RPCv2](http://www.jsonrpc.org/specification) client.
 
+[![Circle CI](https://circleci.com/gh/segmentio/jsonrpc2.js.svg?style=svg&circle-token=2f500aa32b45326a85290a0b005412a1b283f813)](https://circleci.com/gh/segmentio/jsonrpc2.js)
+
 ## API
 
 ### Client(addr, [opts])
