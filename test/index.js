@@ -67,5 +67,17 @@ describe('jsonrpc2', function() {
       assert(err);
       assert.equal(err.code, 'ETIMEDOUT');
     });
+
+    it('should support per-request timeout', function*() {
+      const c = new Client(client.addr);
+      let err = null;
+      try {
+        yield c.call('sleep', [{ time: 100 }], { timeout: 50 });
+      } catch (e) {
+        err = e;
+      }
+      assert(err);
+      assert.equal(err.code, 'ETIMEDOUT');
+    });
   });
 });
