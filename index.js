@@ -40,7 +40,7 @@ function Client(addr, opts) {
 Client.prototype.call = function(method, params, options) {
   if (!options) options = {};
 
-  const id = uid(16);
+  const id = options.async ? null : uid(16);
   const body = {
     method: method,
     params: params,

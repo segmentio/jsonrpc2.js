@@ -80,4 +80,12 @@ describe('jsonrpc2', function() {
       assert.equal(err.code, 'ETIMEDOUT');
     });
   });
+
+  describe('async requests', function() {
+    it('should send a null id', function*() {
+      const c = new Client(client.addr);
+      const res = yield c.call('echo', [], { async: true });
+      assert.strictEqual(res.id, null);
+    });
+  });
 });
