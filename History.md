@@ -1,4 +1,11 @@
 
+0.3.0 / 2016-06-15
+==================
+
+  * adding support for async requests (#6)
+  * call: add options.timeout, client: lower default timeout to 10s (#5)
+  * refactor/cleanup & add real tests (#4)
+
 0.2.3 / 2015-11-20
 ==================
 
