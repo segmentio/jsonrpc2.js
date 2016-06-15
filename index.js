@@ -26,7 +26,7 @@ module.exports = Client;
 function Client(addr, opts) {
   opts = opts || {};
   this.addr = addr;
-  this.timeout = opts.timeout || 30000;
+  this.timeout = opts.timeout || 10000;
 }
 
 /**
@@ -37,7 +37,9 @@ function Client(addr, opts) {
  * @return {Promise}
  */
 
-Client.prototype.call = function(method, params) {
+Client.prototype.call = function(method, params, options) {
+  if (!options) options = {};
+
   const id = uid(16);
   const body = {
     method: method,
@@ -50,7 +52,7 @@ Client.prototype.call = function(method, params) {
     json: true,
     method: 'POST',
     uri: this.addr,
-    timeout: this.timeout,
+    timeout: options.timeout || this.timeout,
     body: body
   };
 
