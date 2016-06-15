@@ -1,4 +1,13 @@
 {
+  "name": "@segment/jsonrpc2",
+  "version": "0.2.3",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "~2.9.25",
+    "debug": "^2.2.0",
+    "request": "^2.57.0",
+    "uid2": "0.0.3"
+  },
   "devDependencies": {
     "co": "^4.5.4",
     "co-mocha": "^1.1.2",
@@ -9,20 +18,5 @@
     "koa-json-body": "^4.0.0",
     "koa-route": "^2.4.2",
     "mocha": "^2.3.4"
-  },
-  "license": "ISC",
-  "author": "",
-  "name": "@segment/jsonrpc2",
-  "version": "0.2.3",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "bluebird": "~2.9.25",
-    "debug": "^2.2.0",
-    "request": "^2.57.0",
-    "uid2": "0.0.3"
   }
 }
