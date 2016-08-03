@@ -95,4 +95,20 @@ describe('jsonrpc2', function () {
       assert.strictEqual(res.id, null)
     })
   })
+
+  describe('when given `opts.logger`', function () {
+    it('should log the requests', function * () {
+      let logged = false
+      const logger = function ({ method, duration }) {
+        assert.equal(method, 'sleep')
+        assert(duration > 100)
+        assert(duration < 200)
+        logged = true
+      }
+
+      const c = new Client(client.addr, { logger })
+      yield c.call('sleep', { time: 100 })
+      assert(logged)
+    })
+  })
 })
