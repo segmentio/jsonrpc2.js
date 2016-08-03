@@ -11,6 +11,7 @@
 Sets up a new JSON-RPC client for the given `addr`. (example: `http://localhost:3000/rpc`)
 Available `opts`:
  - `timeout` the default timeout for requests (default: 10s)
+ - `logger` optional logger for capturing request metrics
 
 ### Client#call(method, params, [options])
 
