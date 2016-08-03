@@ -1,4 +1,11 @@
 
+0.4.0 / 2016-08-03
+==================
+
+  * circle: test on node v6 (#9)
+  * index: add request logger support (#8)
+  * standard
+
 0.3.1 / 2016-06-15
 ==================
 
