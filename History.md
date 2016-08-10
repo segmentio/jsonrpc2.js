@@ -1,4 +1,10 @@
 
+0.4.1 / 2016-08-09
+==================
+
+  * Modify to work on node 4
+  * README: mention `opts.logger`
+
 0.4.0 / 2016-08-03
 ==================
 
