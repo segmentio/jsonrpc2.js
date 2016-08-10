@@ -8,7 +8,7 @@
  */
 
 const koa = require('koa')
-const { post } = require('koa-route')
+const post = require('koa-route').post
 const json = require('koa-json-body')
 
 /**
@@ -22,8 +22,9 @@ const api = {
   error: function * () {
     throw new Error('boom!')
   },
-  sleep: function ({ params }) {
-    const { time } = params[0]
+  sleep: function (body) {
+    const params = body.params
+    const time = params[0].time
     return function (done) {
       setTimeout(done, time)
     }
@@ -45,7 +46,8 @@ app.use(post('/rpc', rpc))
 
 function * rpc () {
   const body = this.request.body
-  const { id, method } = body
+  const id = body.id
+  const method = body.method
 
   const res = {
     jsonrpc: '2.0',

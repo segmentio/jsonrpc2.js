@@ -83,7 +83,7 @@ Client.prototype.call = function (method, params, options) {
  */
 
 Client.prototype.request = function (opts, fn) {
-  const { id } = opts
+  const id = opts.id
   debug('request %j', opts.body)
   request.post(opts, function (err, res, body) {
     body = body || {}

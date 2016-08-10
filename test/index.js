@@ -99,7 +99,9 @@ describe('jsonrpc2', function () {
   describe('when given `opts.logger`', function () {
     it('should log the requests', function * () {
       let logged = false
-      const logger = function ({ method, duration }) {
+      const logger = function (body) {
+        const method = body.method
+        const duration = body.duration
         assert.equal(method, 'sleep')
         assert(duration > 100)
         assert(duration < 200)
