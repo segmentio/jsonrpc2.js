@@ -1,138 +1,113 @@
-
 'use strict'
 
-/**
- * Module dependencies.
- */
+const url = require('url')
+const net = require('net')
+const request = require('request')
+const debug = require('debug')('jsonrpc2')
+const split = require('split2')
+const once = require('once')
+const uid = require('uid2')
 
-var debug = require('debug')('jsonrpc2')
-var request = require('request')
-var uid = require('uid2')
+const noop = () => {}
 
-/**
- * Exports.
- */
+class Client {
+  constructor(address, options) {
+    options = options || {}
 
-module.exports = Client
+    this.timeout = options.timeout || 10000
 
-/**
- * Client.
- *
- * @param {String} addr
- * @param {Object} opts
- * @param {Number} [opts.timeout]
- * @param {Function} [opts.logger]
- */
+    this.address = url.parse(address)
+    this.address.port = this.address.port || 80
+    
+    if (this.address.protocol === 'tcp:') {
+      this.request = this.makeTCPRequest.bind(this)
+    } else {
+      this.request = this.makeHTTPRequest.bind(this)
+    }
 
-function Client (addr, opts) {
-  opts = opts || {}
-  this.addr = addr
-  this.timeout = opts.timeout || 10000
-  this.logger = opts.logger || function () {}
-}
-
-/**
- * Call rpc method with params.
- *
- * @param {String} method
- * @param {String} params
- * @return {Promise}
- */
-
-Client.prototype.call = function (method, params, options) {
-  if (!options) options = { forceArray: true }
-  var self = this
-  var id = options.async ? null : uid(16)
-  var forceArray = options.forceArray && !Array.isArray(params)
-  var body = {
-    method: method,
-    params: forceArray ? [ params ] : params,
-    id: id,
-    jsonrpc: '2.0' // http://www.jsonrpc.org/specification
+    this.logger = options.logger || noop
   }
 
-  var opts = {
-    json: true,
-    method: 'POST',
-    uri: this.addr,
-    timeout: options.timeout || this.timeout,
-    body: body
-  }
+  makeHTTPRequest(body, options, fn) {
+    const requestOptions = {
+      json: true,
+      method: 'POST',
+      timeout: options.timeout || this.timeout,
+      uri: url.format(this.address),
+      body
+    }
 
-  var startTime = new Date()
-  return new Promise(function (resolve, reject) {
-    self.request(opts, function (err, res) {
-      var endTime = new Date()
-      var duration = endTime - startTime
-      self.log(method, params, duration, res, err)
+    request.post(requestOptions, function (err, res, body) {
+      body = body || {}
 
       if (err) {
-        reject(err)
-      } else {
-        resolve(res)
+        debug('error for %s: %s', options.id, err.message)
+        return fn(err)
       }
+
+      if (body.error) {
+        if (typeof body.error === 'object') {
+          const e = new Error(body.error.message)
+          e.code = body.error.code
+          e.data = body.error.data
+          debug('error for %s: %s', options.id, e.message)
+          return fn(e)
+        }
+
+        // XXX: why do we do this?
+        if (body.error !== 'not found') {
+          debug('error for %s: %s', options.id, body.error)
+          return fn(new Error(body.error))
+        }
+      }
+
+      debug('success %s: %j', options.id, body.result || {})
+      fn(null, body.result)
     })
-  })
-}
+  }
 
-/**
- * Make the request.
- *
- * @param {Object} opts
- * @param {Function} fn
- * @api private
- */
+  makeTCPRequest(body, options, fn) {
+    fn = once(fn)
+    
+    let response = null
+    
+    const socket = net.connect(this.address.port, this.address.hostname)
+    socket.setTimeout(options.timeout || this.timeout)
 
-Client.prototype.request = function (opts, fn) {
-  var id = opts.id
-  debug('request %j', opts.body)
-  request.post(opts, function (err, res, body) {
-    body = body || {}
+    socket
+      .on('error', fn)
+      .pipe(split(JSON.parse))
+      .on('data', data => {
+        response = data
+      })
+      .on('end', () => {
+        fn(null, response.result)
+      })
 
-    if (err) {
-      debug('error for %s: %s', id, err.message)
-      return fn(err)
+    socket.write(JSON.stringify(body))
+  }
+
+  call(method, params, options) {
+    options = options || {}
+    
+    const body = {
+      params: Array.isArray(params) ? params : [params],
+      jsonrpc: '2.0',
+      id: options.async ? null : uid(16),
+      method
     }
-
-    if (body.error) {
-      if (typeof body.error === 'object') {
-        var e = new Error(body.error.message)
-        e.code = body.error.code
-        e.data = body.error.data
-        debug('error for %s: %s', id, e.message)
-        return fn(e)
-      }
-
-      // XXX: why do we do this?
-      if (body.error !== 'not found') {
-        debug('error for %s: %s', id, body.error)
-        return fn(new Error(body.error))
-      }
-    }
-
-    debug('success %s: %j', id, body.result || {})
-    fn(null, body.result)
-  })
+    
+    return new Promise((resolve, reject) => {
+      this.request(body, options, (err, result) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        
+        resolve(result)
+      })
+    })
+  }
 }
 
-/**
- * Log the request via `this.logger`
- *
- * @param {String} method
- * @param {Mixed} params
- * @param {Number} duration
- * @param {Mixed} result
- * @param {Error|null} error
- * @api private
- */
-
-Client.prototype.log = function (method, params, duration, result, error) {
-  this.logger({
-    method: method,
-    params: params,
-    duration: duration,
-    result: result,
-    error: error,
-    addr: this.addr
-  })
-}
+module.exports = Client

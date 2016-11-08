@@ -1,4 +1,3 @@
-
 /* eslint-env mocha */
 
 'use strict'
@@ -8,16 +7,18 @@ const http = require('http')
 const app = require('./app')
 const Client = require('..')
 
-describe('jsonrpc2', function () {
+describe('jsonrpc2 (http)', function () {
   let server = null
   let client = null
+  let address = null
 
   before(function (done) {
     server = http.createServer(app.callback())
     server.listen(function (err) {
       if (err) return done(err)
       const port = server.address().port
-      client = new Client(`http://localhost:${port}/rpc`)
+      address = `http://localhost:${port}/rpc`
+      client = new Client(address)
       done()
     })
   })
@@ -64,7 +65,7 @@ describe('jsonrpc2', function () {
 
   describe('when the request times out', function () {
     it('should error', function * () {
-      const c = new Client(client.addr, { timeout: 50 })
+      const c = new Client(address, { timeout: 50 })
       let err = null
       try {
         yield c.call('sleep', [{ time: 100 }])
@@ -76,7 +77,7 @@ describe('jsonrpc2', function () {
     })
 
     it('should support per-request timeout', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       let err = null
       try {
         yield c.call('sleep', [{ time: 100 }], { timeout: 50 })
@@ -90,7 +91,7 @@ describe('jsonrpc2', function () {
 
   describe('async requests', function () {
     it('should send a null id', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       const res = yield c.call('echo', [], { async: true })
       assert.strictEqual(res.id, null)
     })
@@ -108,7 +109,7 @@ describe('jsonrpc2', function () {
         logged = true
       }
 
-      const c = new Client(client.addr, { logger })
+      const c = new Client(address, { logger })
       yield c.call('sleep', { time: 100 })
       assert(logged)
     })
