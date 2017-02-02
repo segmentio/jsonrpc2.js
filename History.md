@@ -1,4 +1,10 @@
 
+0.4.2 / 2017-02-02
+==================
+
+  * fix package for old versions of node (0.12) for api (#14)
+  * test: fix ESOCKETTIMEDOUT code (#13)
+
 0.4.1 / 2016-08-09
 ==================
 

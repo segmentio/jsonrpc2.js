@@ -1,6 +1,6 @@
 {
   "name": "@segment/jsonrpc2",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "ISC",
   "dependencies": {
     "bluebird": "~2.9.25",
