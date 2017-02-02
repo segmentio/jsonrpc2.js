@@ -5,9 +5,9 @@
  * Module dependencies.
  */
 
-const debug = require('debug')('jsonrpc2')
-const request = require('request')
-const uid = require('uid2')
+var debug = require('debug')('jsonrpc2')
+var request = require('request')
+var uid = require('uid2')
 
 /**
  * Exports.
@@ -41,16 +41,16 @@ function Client (addr, opts) {
 
 Client.prototype.call = function (method, params, options) {
   if (!options) options = {}
-  const self = this
-  const id = options.async ? null : uid(16)
-  const body = {
+  var self = this
+  var id = options.async ? null : uid(16)
+  var body = {
     method: method,
     params: Array.isArray(params) ? params : [ params ],
     id: id,
     jsonrpc: '2.0' // http://www.jsonrpc.org/specification
   }
 
-  const opts = {
+  var opts = {
     json: true,
     method: 'POST',
     uri: this.addr,
@@ -58,11 +58,11 @@ Client.prototype.call = function (method, params, options) {
     body: body
   }
 
-  const startTime = new Date()
+  var startTime = new Date()
   return new Promise(function (resolve, reject) {
     self.request(opts, function (err, res) {
-      const endTime = new Date()
-      const duration = endTime - startTime
+      var endTime = new Date()
+      var duration = endTime - startTime
       self.log(method, params, duration, res, err)
 
       if (err) {
@@ -83,7 +83,7 @@ Client.prototype.call = function (method, params, options) {
  */
 
 Client.prototype.request = function (opts, fn) {
-  const id = opts.id
+  var id = opts.id
   debug('request %j', opts.body)
   request.post(opts, function (err, res, body) {
     body = body || {}
@@ -95,7 +95,7 @@ Client.prototype.request = function (opts, fn) {
 
     if (body.error) {
       if (typeof body.error === 'object') {
-        const e = new Error(body.error.message)
+        var e = new Error(body.error.message)
         e.code = body.error.code
         e.data = body.error.data
         debug('error for %s: %s', id, e.message)
@@ -126,5 +126,12 @@ Client.prototype.request = function (opts, fn) {
  */
 
 Client.prototype.log = function (method, params, duration, result, error) {
-  this.logger({ method, params, duration, result, error, addr: this.addr })
+  this.logger({
+    method: method,
+    params: params,
+    duration: duration,
+    result: result,
+    error: error,
+    addr: this.addr
+  })
 }
