@@ -20,6 +20,7 @@ Calls the given `method` with the given `params`. (if not an array, it will be c
 Available `options`:
  - `timeout` override the default client timeout
  - `async` use this when you don't need the answer back from the server (ie: it will set `id: null`)
+ - `forceArray` use this when you want the request params to be converted to an array (default: true)
 
 ## Developers
 
