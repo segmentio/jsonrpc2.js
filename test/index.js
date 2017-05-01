@@ -113,4 +113,12 @@ describe('jsonrpc2', function () {
       assert(logged)
     })
   })
+
+  describe('when given `options.forceArray`', function () {
+    it('should not transform params to array if false', function * () {
+      const c = new Client(client.addr)
+      const res = yield c.call('echo', { hello: 'world' }, { forceArray: false })
+      assert.deepEqual(res.params, { hello: 'world' })
+    })
+  })
 })
