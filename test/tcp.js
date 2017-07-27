@@ -2,25 +2,15 @@
 
 'use strict'
 
-const mitm = require('mitm')
+const net = require('net')
 const assert = require('assert')
 const Client = require('..')
 
 describe('jsonrpc2 (tcp)', function () {
-  let mock = null
-
-  beforeEach(function () {
-    mock = mitm()
-  })
-
-  afterEach(function () {
-    mock.disable()
-  })
-
-  it('should work', function * () {
+  it.only('should work', function * () {
     let called = false
 
-    mock.on('connection', function (socket) {
+    const server = net.createServer(socket => {
       socket.on('data', function (buf) {
         const json = JSON.parse(buf)
 
@@ -31,11 +21,11 @@ describe('jsonrpc2 (tcp)', function () {
           id: json.id,
           jsonrpc: '2.0',
           result: 42
-        }))
-
-        socket.destroy()
+        }) + '\n')
       })
     })
+
+    server.listen(4003)
 
     const client = new Client('tcp://localhost:4003/rpc')
     const result = yield client.call('Foo.Bar', { foo: 'bar' })
@@ -44,8 +34,6 @@ describe('jsonrpc2 (tcp)', function () {
   })
 
   it('should handle connection errors', function * () {
-    mock.disable()
-
     let error = null
     const client = new Client('tcp://sldkfjsdflksdfjsdklfjssdlfj:23423')
     try {

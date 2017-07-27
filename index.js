@@ -68,6 +68,7 @@ class Client {
       .pipe(split(JSON.parse))
       .on('data', data => {
         response = data
+        socket.end()
       })
       .on('end', () => {
         fn(null, response.result)
