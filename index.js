@@ -88,10 +88,14 @@ class Client {
   }
 
   call(method, params, options) {
-    options = options || {}
+    options = Object.assign({
+      forceArray: true
+    }, options)
+    
+    const forceArray = options.forceArray && !Array.isArray(params)
     
     const body = {
-      params: Array.isArray(params) ? params : [params],
+      params: forceArray ? [params] : params,
       jsonrpc: '2.0',
       id: options.async ? null : uid(16),
       method

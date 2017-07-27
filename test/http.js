@@ -97,27 +97,9 @@ describe('jsonrpc2 (http)', function () {
     })
   })
 
-  describe('when given `opts.logger`', function () {
-    it('should log the requests', function * () {
-      let logged = false
-      const logger = function (body) {
-        const method = body.method
-        const duration = body.duration
-        assert.equal(method, 'sleep')
-        assert(duration > 100)
-        assert(duration < 200)
-        logged = true
-      }
-
-      const c = new Client(address, { logger })
-      yield c.call('sleep', { time: 100 })
-      assert(logged)
-    })
-  })
-
   describe('when given `options.forceArray`', function () {
     it('should not transform params to array if false', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       const res = yield c.call('echo', { hello: 'world' }, { forceArray: false })
       assert.deepEqual(res.params, { hello: 'world' })
     })
