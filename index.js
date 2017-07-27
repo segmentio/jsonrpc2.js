@@ -1,6 +1,6 @@
 'use strict'
 
-const url = require('url')
+const parseUrl = require('url').parse
 const net = require('net')
 const request = require('request')
 const debug = require('debug')('jsonrpc2')
@@ -11,54 +11,45 @@ const uid = require('uid2')
 const noop = () => {}
 
 class Client {
-  constructor(address, options) {
+  constructor(url, options) {
     options = options || {}
 
-    this.timeout = options.timeout || 10000
-
-    this.address = url.parse(address)
-    this.address.port = this.address.port || 80
+    const address = parseUrl(url)
+    this.hostname = address.hostname
+    this.url = url
+    this.port = address.port || 80
     
-    if (this.address.protocol === 'tcp:') {
+    if (address.protocol === 'tcp:') {
       this.request = this.makeTCPRequest.bind(this)
     } else {
       this.request = this.makeHTTPRequest.bind(this)
     }
-
-    this.logger = options.logger || noop
+    
+    this.timeout = options.timeout || 10000
   }
 
   makeHTTPRequest(body, options, fn) {
     const requestOptions = {
       json: true,
-      method: 'POST',
       timeout: options.timeout || this.timeout,
-      uri: url.format(this.address),
       body
     }
 
-    request.post(requestOptions, function (err, res, body) {
+    request.post(this.url, requestOptions, (err, res, body) => {
       body = body || {}
 
       if (err) {
-        debug('error for %s: %s', options.id, err.message)
+        debug('error %s: %s', options.id, err.message)
         return fn(err)
       }
 
-      if (body.error) {
-        if (typeof body.error === 'object') {
-          const e = new Error(body.error.message)
-          e.code = body.error.code
-          e.data = body.error.data
-          debug('error for %s: %s', options.id, e.message)
-          return fn(e)
-        }
-
-        // XXX: why do we do this?
-        if (body.error !== 'not found') {
-          debug('error for %s: %s', options.id, body.error)
-          return fn(new Error(body.error))
-        }
+      if (typeof body.error === 'object') {
+        const err = new Error(body.error.message)
+        err.code = body.error.code
+        err.data = body.error.data
+        
+        debug('error %s: %s', options.id, err.message)
+        return fn(err)
       }
 
       debug('success %s: %j', options.id, body.result || {})
@@ -69,9 +60,9 @@ class Client {
   makeTCPRequest(body, options, fn) {
     fn = once(fn)
     
-    let response = null
+    let response = {}
     
-    const socket = net.connect(this.address.port, this.address.hostname)
+    const socket = net.connect(this.port, this.hostname)
     socket.setTimeout(options.timeout || this.timeout)
 
     socket
