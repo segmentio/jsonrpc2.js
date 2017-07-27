@@ -8,27 +8,25 @@ const split = require('split2')
 const once = require('once')
 const uid = require('uid2')
 
-const noop = () => {}
-
 class Client {
-  constructor(url, options) {
+  constructor (url, options) {
     options = options || {}
 
     const address = parseUrl(url)
     this.hostname = address.hostname
     this.url = url
     this.port = address.port || 80
-    
+
     if (address.protocol === 'tcp:') {
       this.request = this.makeTCPRequest.bind(this)
     } else {
       this.request = this.makeHTTPRequest.bind(this)
     }
-    
+
     this.timeout = options.timeout || 10000
   }
 
-  makeHTTPRequest(body, options, fn) {
+  makeHTTPRequest (body, options, fn) {
     const requestOptions = {
       json: true,
       timeout: options.timeout || this.timeout,
@@ -47,7 +45,7 @@ class Client {
         const err = new Error(body.error.message)
         err.code = body.error.code
         err.data = body.error.data
-        
+
         debug('error %s: %s', options.id, err.message)
         return fn(err)
       }
@@ -57,11 +55,11 @@ class Client {
     })
   }
 
-  makeTCPRequest(body, options, fn) {
+  makeTCPRequest (body, options, fn) {
     fn = once(fn)
-    
+
     let response = {}
-    
+
     const socket = net.connect(this.port, this.hostname)
     socket.setTimeout(options.timeout || this.timeout)
 
@@ -78,27 +76,27 @@ class Client {
     socket.write(JSON.stringify(body))
   }
 
-  call(method, params, options) {
+  call (method, params, options) {
     options = Object.assign({
       forceArray: true
     }, options)
-    
+
     const forceArray = options.forceArray && !Array.isArray(params)
-    
+
     const body = {
       params: forceArray ? [params] : params,
       jsonrpc: '2.0',
       id: options.async ? null : uid(16),
       method
     }
-    
+
     return new Promise((resolve, reject) => {
       this.request(body, options, (err, result) => {
         if (err) {
           reject(err)
           return
         }
-        
+
         resolve(result)
       })
     })
