@@ -2,7 +2,6 @@
 BIN := node_modules/.bin
 
 NODE ?= node
-MOCHA_FLAGS ?=
 
 SRC := index.js
 TESTS := $(wildcard test/*.js)
@@ -14,13 +13,10 @@ node_modules: package.json
 	@touch $@
 
 test: node_modules
-	$(BIN)/mocha $(MOCHA_FLAGS)
+	$(BIN)/ava
 
 lint: node_modules
 	$(BIN)/standard
-
-coverage: $(SRC) $(TESTS) node_modules
-	$(NODE) $(BIN)/istanbul cover $(BIN)/_mocha $(MOCHA_FLAGS)
 
 clean:
 	rm -rf coverage

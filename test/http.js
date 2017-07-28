@@ -1,128 +1,101 @@
-/* eslint-env mocha */
+import {parse as parseUrl} from 'url'
+import http from 'http'
+import {spy} from 'sinon'
+import test from 'ava'
+import Client from '..'
+import app from './_app'
 
-'use strict'
+let server
+let address
 
-const parseUrl = require('url').parse
-const assert = require('assert')
-const http = require('http')
-const app = require('./app')
-const Client = require('..')
+test.before.cb(t => {
+  server = http.createServer(app.callback())
+  server.listen(() => {
+    const port = server.address().port
+    address = `http://localhost:${port}/rpc`
 
-describe('jsonrpc2 (http)', function () {
-  let server = null
-  let client = null
-  let address = null
+    t.end()
+  })
+})
 
-  before(function (done) {
-    server = http.createServer(app.callback())
-    server.listen(function (err) {
-      if (err) return done(err)
-      const port = server.address().port
-      address = `http://localhost:${port}/rpc`
-      client = new Client(address)
-      done()
-    })
+test.after.cb(t => {
+  server.close(t.end)
+})
+
+test('generate a unique id', async t => {
+  const client = new Client(address)
+  const resA = await client.call('echo', true)
+  const resB = await client.call('echo', true)
+
+  t.is(typeof resA.id, 'string')
+  t.is(typeof resB.id, 'string')
+  t.true(resA.id.length > 0)
+  t.true(resB.id.length > 0)
+  t.not(resA.id, resB.id)
+})
+
+test('call the correct method', async t => {
+  const client = new Client(address)
+  const res = await client.call('echo', true)
+  t.is(res.method, 'echo')
+})
+
+test('send params', async t => {
+  const client = new Client(address)
+  const res = await client.call('echo', [true])
+  t.deepEqual(res.params, [true])
+})
+
+test('send params and wrap in an array', async t => {
+  const client = new Client(address)
+  const res = await client.call('echo', true)
+  t.deepEqual(res.params, [true])
+})
+
+test('send params without wrapping in an array', async t => {
+  const client = new Client(address)
+  const res = await client.call('echo', true, { forceArray: false })
+  t.true(res.params)
+})
+
+test('throw when request fails', async t => {
+  const client = new Client(address)
+  await t.throws(client.call('error', []))
+})
+
+test('timeout', async t => {
+  const client = new Client(address, { timeout: 50 })
+  const err = await t.throws(client.call('sleep', { time: 100 }))
+  t.is(err.code, 'ESOCKETTIMEDOUT')
+})
+
+test('per-request timeout', async t => {
+  const client = new Client(address)
+  const err = await t.throws(client.call('sleep', { time: 100 }, { timeout: 50 }))
+  t.is(err.code, 'ESOCKETTIMEDOUT')
+})
+
+test('send empty id on async request', async t => {
+  const client = new Client(address)
+  const res = await client.call('echo', [], { async: true })
+  t.is(res.id, null)
+})
+
+test('log', async t => {
+  const logger = spy(options => {
+    t.is(options.method, 'echo')
+    t.deepEqual(options.params, { hello: 'world' })
+    t.true(options.duration > 0)
+    t.deepEqual(options.result.params, [{ hello: 'world' }])
+    t.is(options.result.method, 'echo')
+    t.is(options.result.jsonrpc, '2.0')
+    t.true(options.result.id.length > 0)
+    t.is(options.error, null)
+    t.deepEqual(options.addr, parseUrl(address))
   })
 
-  after(function (done) {
-    server.close(done)
-  })
+  const client = new Client(address, { logger })
+  await client.call('echo', { hello: 'world' })
 
-  it('should not explode', function * () {
-    yield client.call('echo', [{ foo: 'bar' }])
-  })
-
-  it('should generate a unique id', function * () {
-    const res = yield client.call('echo', [ true ])
-    assert(res.id)
-  })
-
-  it('should call the correct method', function * () {
-    const res = yield client.call('echo', [ true ])
-    assert.equal(res.method, 'echo')
-  })
-
-  it('should pass `params`', function * () {
-    const res = yield client.call('echo', [ true ])
-    assert.deepEqual(res.params, [ true ])
-  })
-
-  it('should allow a non-array for a single param', function * () {
-    const res = yield client.call('echo', true)
-    assert.deepEqual(res.params, [ true ])
-  })
-
-  describe('when the request fails', function () {
-    it('should throw', function * () {
-      let err = null
-      try {
-        yield client.call('error', [])
-      } catch (e) {
-        err = e
-      }
-      assert(err)
-    })
-  })
-
-  describe('when the request times out', function () {
-    it('should error', function * () {
-      const c = new Client(address, { timeout: 50 })
-      let err = null
-      try {
-        yield c.call('sleep', [{ time: 100 }])
-      } catch (e) {
-        err = e
-      }
-      assert(err)
-      assert.equal(err.code, 'ESOCKETTIMEDOUT')
-    })
-
-    it('should support per-request timeout', function * () {
-      const c = new Client(address)
-      let err = null
-      try {
-        yield c.call('sleep', [{ time: 100 }], { timeout: 50 })
-      } catch (e) {
-        err = e
-      }
-      assert(err)
-      assert.equal(err.code, 'ESOCKETTIMEDOUT')
-    })
-  })
-
-  describe('async requests', function () {
-    it('should send a null id', function * () {
-      const c = new Client(address)
-      const res = yield c.call('echo', [], { async: true })
-      assert.strictEqual(res.id, null)
-    })
-  })
-
-  describe('when given `options.forceArray`', function () {
-    it('should not transform params to array if false', function * () {
-      const c = new Client(address)
-      const res = yield c.call('echo', { hello: 'world' }, { forceArray: false })
-      assert.deepEqual(res.params, { hello: 'world' })
-    })
-  })
-
-  it('should log', function * () {
-    let called = false
-    const logger = options => {
-      called = true
-      assert.equal(options.method, 'echo')
-      assert.deepEqual(options.params, { hello: 'world' })
-      assert(options.duration > 0)
-      assert.deepEqual(options.result.params, [{ hello: 'world' }])
-      assert.equal(options.result.method, 'echo')
-      assert.equal(options.result.jsonrpc, '2.0')
-      assert(options.result.id.length > 0)
-      assert.equal(options.error, null)
-      assert.deepEqual(options.addr, parseUrl(address))
-    }
-
-    const c = new Client(address, { logger })
-    yield c.call('echo', { hello: 'world' })
-    assert.equal(called, true)
-  })
+  t.true(logger.calledOnce)
 })
