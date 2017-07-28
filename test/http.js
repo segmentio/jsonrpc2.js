@@ -2,6 +2,7 @@
 
 'use strict'
 
+const parseUrl = require('url').parse
 const assert = require('assert')
 const http = require('http')
 const app = require('./app')
@@ -103,5 +104,25 @@ describe('jsonrpc2 (http)', function () {
       const res = yield c.call('echo', { hello: 'world' }, { forceArray: false })
       assert.deepEqual(res.params, { hello: 'world' })
     })
+  })
+
+  it('should log', function * () {
+    let called = false
+    const logger = options => {
+      called = true
+      assert.equal(options.method, 'echo')
+      assert.deepEqual(options.params, { hello: 'world' })
+      assert(options.duration > 0)
+      assert.deepEqual(options.result.params, [{ hello: 'world' }])
+      assert.equal(options.result.method, 'echo')
+      assert.equal(options.result.jsonrpc, '2.0')
+      assert(options.result.id.length > 0)
+      assert.equal(options.error, null)
+      assert.deepEqual(options.addr, parseUrl(address))
+    }
+
+    const c = new Client(address, { logger })
+    yield c.call('echo', { hello: 'world' })
+    assert.equal(called, true)
   })
 })

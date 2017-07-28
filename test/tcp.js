@@ -7,7 +7,7 @@ const assert = require('assert')
 const Client = require('..')
 
 describe('jsonrpc2 (tcp)', function () {
-  it.only('should work', function * () {
+  it('should work', function * () {
     let called = false
 
     const server = net.createServer(socket => {

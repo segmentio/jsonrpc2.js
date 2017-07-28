@@ -8,22 +8,25 @@ const split = require('split2')
 const once = require('once')
 const uid = require('uid2')
 
+const noop = () => {}
+
 class Client {
   constructor (url, options) {
     options = options || {}
 
-    const address = parseUrl(url)
-    this.hostname = address.hostname
+    this.address = parseUrl(url)
+    this.hostname = this.address.hostname
     this.url = url
-    this.port = address.port || 80
+    this.port = this.address.port || 80
 
-    if (address.protocol === 'tcp:') {
+    if (this.address.protocol === 'tcp:') {
       this.request = this.makeTCPRequest.bind(this)
     } else {
       this.request = this.makeHTTPRequest.bind(this)
     }
 
     this.timeout = options.timeout || 10000
+    this.logger = options.logger || noop
   }
 
   makeHTTPRequest (body, options, fn) {
@@ -92,7 +95,12 @@ class Client {
     }
 
     return new Promise((resolve, reject) => {
+      const startTime = new Date()
+
       this.request(body, options, (err, result) => {
+        const duration = new Date() - startTime
+        this.log(method, params, duration, result, err)
+
         if (err) {
           reject(err)
           return
@@ -100,6 +108,17 @@ class Client {
 
         resolve(result)
       })
+    })
+  }
+
+  log (method, params, duration, result, error) {
+    this.logger({
+      method,
+      params,
+      duration,
+      result,
+      error,
+      addr: this.address
     })
   }
 }
