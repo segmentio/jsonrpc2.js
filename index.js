@@ -3,6 +3,7 @@
 const parseUrl = require('url').parse
 const net = require('net')
 const request = require('request')
+const compose = require('koa-compose')
 const debug = require('debug')('jsonrpc2')
 const split = require('split2')
 const once = require('once')
@@ -28,6 +29,12 @@ class Client {
     this.timeout = options.timeout || 10000
     this.logger = options.logger || noop
     this.userAgent = options.userAgent || null
+    this.middleware = []
+
+    this.logMiddleware = this.logMiddleware.bind(this)
+    this.callMiddleware = this.callMiddleware.bind(this)
+
+    this.rebuildMiddleware()
   }
 
   makeHTTPRequest (body, options, fn) {
@@ -84,10 +91,37 @@ class Client {
     socket.write(JSON.stringify(body))
   }
 
+  use (middleware) {
+    this.middleware.push(middleware)
+    this.rebuildMiddleware()
+  }
+
+  rebuildMiddleware () {
+    this.exec = compose([].concat(
+      this.logMiddleware,
+      this.middleware,
+      this.callMiddleware
+    ))
+  }
+
   call (method, params, options) {
-    options = Object.assign({
+    const context = {
+      method,
+      params,
+      options,
+      result: null
+    }
+
+    return this.exec(context).then(() => context.result)
+  }
+
+  callMiddleware (context) {
+    const options = Object.assign({
       forceArray: true
-    }, options)
+    }, context.options)
+
+    const params = context.params
+    const method = context.method
 
     const forceArray = options.forceArray && !Array.isArray(params)
 
@@ -99,31 +133,41 @@ class Client {
     }
 
     return new Promise((resolve, reject) => {
-      const startTime = new Date()
-
       this.request(body, options, (err, result) => {
-        const duration = new Date() - startTime
-        this.log(method, params, duration, result, err)
-
         if (err) {
           reject(err)
           return
         }
 
-        resolve(result)
+        context.result = result
+        resolve()
       })
     })
   }
 
-  log (method, params, duration, result, error) {
-    this.logger({
-      method,
-      params,
-      duration,
-      result,
-      error,
-      addr: this.address
-    })
+  logMiddleware (context, next) {
+    const startTime = new Date()
+
+    const log = err => {
+      const duration = new Date() - startTime
+
+      this.logger({
+        method: context.method,
+        params: context.params,
+        duration,
+        result: context.result,
+        error: err || null,
+        addr: this.address
+      })
+
+      if (err) {
+        return Promise.reject(err)
+      }
+    }
+
+    return next()
+      .then(log)
+      .catch(log)
   }
 }
 
