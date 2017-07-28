@@ -1,23 +1,25 @@
-
 /* eslint-env mocha */
 
 'use strict'
 
+const parseUrl = require('url').parse
 const assert = require('assert')
 const http = require('http')
 const app = require('./app')
 const Client = require('..')
 
-describe('jsonrpc2', function () {
+describe('jsonrpc2 (http)', function () {
   let server = null
   let client = null
+  let address = null
 
   before(function (done) {
     server = http.createServer(app.callback())
     server.listen(function (err) {
       if (err) return done(err)
       const port = server.address().port
-      client = new Client(`http://localhost:${port}/rpc`)
+      address = `http://localhost:${port}/rpc`
+      client = new Client(address)
       done()
     })
   })
@@ -64,7 +66,7 @@ describe('jsonrpc2', function () {
 
   describe('when the request times out', function () {
     it('should error', function * () {
-      const c = new Client(client.addr, { timeout: 50 })
+      const c = new Client(address, { timeout: 50 })
       let err = null
       try {
         yield c.call('sleep', [{ time: 100 }])
@@ -76,7 +78,7 @@ describe('jsonrpc2', function () {
     })
 
     it('should support per-request timeout', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       let err = null
       try {
         yield c.call('sleep', [{ time: 100 }], { timeout: 50 })
@@ -90,35 +92,37 @@ describe('jsonrpc2', function () {
 
   describe('async requests', function () {
     it('should send a null id', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       const res = yield c.call('echo', [], { async: true })
       assert.strictEqual(res.id, null)
     })
   })
 
-  describe('when given `opts.logger`', function () {
-    it('should log the requests', function * () {
-      let logged = false
-      const logger = function (body) {
-        const method = body.method
-        const duration = body.duration
-        assert.equal(method, 'sleep')
-        assert(duration > 100)
-        assert(duration < 200)
-        logged = true
-      }
-
-      const c = new Client(client.addr, { logger })
-      yield c.call('sleep', { time: 100 })
-      assert(logged)
-    })
-  })
-
   describe('when given `options.forceArray`', function () {
     it('should not transform params to array if false', function * () {
-      const c = new Client(client.addr)
+      const c = new Client(address)
       const res = yield c.call('echo', { hello: 'world' }, { forceArray: false })
       assert.deepEqual(res.params, { hello: 'world' })
     })
+  })
+
+  it('should log', function * () {
+    let called = false
+    const logger = options => {
+      called = true
+      assert.equal(options.method, 'echo')
+      assert.deepEqual(options.params, { hello: 'world' })
+      assert(options.duration > 0)
+      assert.deepEqual(options.result.params, [{ hello: 'world' }])
+      assert.equal(options.result.method, 'echo')
+      assert.equal(options.result.jsonrpc, '2.0')
+      assert(options.result.id.length > 0)
+      assert.equal(options.error, null)
+      assert.deepEqual(options.addr, parseUrl(address))
+    }
+
+    const c = new Client(address, { logger })
+    yield c.call('echo', { hello: 'world' })
+    assert.equal(called, true)
   })
 })

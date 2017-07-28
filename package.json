@@ -5,7 +5,9 @@
   "dependencies": {
     "bluebird": "~2.9.25",
     "debug": "^2.2.0",
+    "once": "^1.4.0",
     "request": "^2.57.0",
+    "split2": "^2.1.0",
     "uid2": "0.0.3"
   },
   "devDependencies": {
