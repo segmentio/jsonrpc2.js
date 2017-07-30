@@ -27,6 +27,7 @@ class Client {
 
     this.timeout = options.timeout || 10000
     this.logger = options.logger || noop
+    this.userAgent = options.userAgent || null
   }
 
   makeHTTPRequest (body, options, fn) {
@@ -34,6 +35,10 @@ class Client {
       json: true,
       timeout: options.timeout || this.timeout,
       body
+    }
+    const userAgent = options.userAgent || this.userAgent
+    if (userAgent) {
+      requestOptions.headers = { 'user-agent': userAgent }
     }
 
     request.post(this.url, requestOptions, (err, res, body) => {

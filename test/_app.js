@@ -14,11 +14,12 @@ const api = {
     return done => {
       setTimeout(done, params[0].time)
     }
-  }
+  },
+  headers: (_, headers) => headers
 }
 
 app.use(post('/rpc', function * () {
-  const body = this.request.body
+  const { body, headers } = this.request
   const {id, method} = body
 
   const res = {
@@ -27,7 +28,7 @@ app.use(post('/rpc', function * () {
   }
 
   try {
-    res.result = yield api[method](body)
+    res.result = yield api[method](body, headers)
   } catch (e) {
     res.error = {
       message: e.toString(),
