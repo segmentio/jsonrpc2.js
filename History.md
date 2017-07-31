@@ -1,4 +1,11 @@
 
+0.6.0 / 2017-07-31
+==================
+
+  * Add support for setting userAgent (#19)
+  * Switch from Mocha to AVA (#17)
+  * Rewrite with TCP support (#12)
+
 0.5.0 / 2017-05-01
 ==================
 
