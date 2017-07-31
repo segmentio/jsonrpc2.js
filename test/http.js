@@ -1,6 +1,4 @@
-import {parse as parseUrl} from 'url'
 import http from 'http'
-import {spy} from 'sinon'
 import test from 'ava'
 import Client from '..'
 import app from './_app'
@@ -85,23 +83,4 @@ test('send empty id on async request', async t => {
   const client = new Client(address)
   const res = await client.call('echo', [], { async: true })
   t.is(res.id, null)
-})
-
-test('log', async t => {
-  const logger = spy(options => {
-    t.is(options.method, 'echo')
-    t.deepEqual(options.params, { hello: 'world' })
-    t.true(options.duration > 0)
-    t.deepEqual(options.result.params, [{ hello: 'world' }])
-    t.is(options.result.method, 'echo')
-    t.is(options.result.jsonrpc, '2.0')
-    t.true(options.result.id.length > 0)
-    t.is(options.error, null)
-    t.deepEqual(options.addr, parseUrl(address))
-  })
-
-  const client = new Client(address, { logger })
-  await client.call('echo', { hello: 'world' })
-
-  t.true(logger.calledOnce)
 })
