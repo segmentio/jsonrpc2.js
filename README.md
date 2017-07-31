@@ -60,3 +60,8 @@ making new releasees:
  - bump `version` in `package.json`
  - `git-changelog -t <version>`
  - `git-release <version>`
+
+
+## License
+
+MIT &copy; 2017 Segment Inc. \<friends@segment.com\>

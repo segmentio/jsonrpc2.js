@@ -1,7 +1,7 @@
 {
   "name": "@segment/jsonrpc2",
   "version": "0.6.0",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "test": "standard && ava"
   },
