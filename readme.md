@@ -1,30 +1,76 @@
-# @segment/jsonrpc2.js
+# @segment/jsonrpc2.js [![Circle CI](https://circleci.com/gh/segmentio/jsonrpc2.js.svg?style=svg&circle-token=2f500aa32b45326a85290a0b005412a1b283f813)](https://circleci.com/gh/segmentio/jsonrpc2.js)
 
 > A [JSON-RPCv2](http://www.jsonrpc.org/specification) client.
 
-[![Circle CI](https://circleci.com/gh/segmentio/jsonrpc2.js.svg?style=svg&circle-token=2f500aa32b45326a85290a0b005412a1b283f813)](https://circleci.com/gh/segmentio/jsonrpc2.js)
 
 ## API
 
-### Client(addr, [opts])
+### new Client(address, [options])
 
 Sets up a new JSON-RPC client for the given `addr`. (example: `http://localhost:3000/rpc`)
-Available `opts`:
- - `timeout` the default timeout for requests (default: 10s)
- - `logger` optional logger for capturing request metrics
 
-### Client#call(method, params, [options])
+#### options
+
+##### timeout
+
+Type: `number`<br>
+Default: `10000`
+
+Request timeout (in milliseconds).
+
+##### logger
+
+Type: `function`
+
+Optional logger for capturing request metrics.
+
+### Instance
+
+#### call(method, [params], [options])
 
 Calls the given `method` with the given `params`. (if not an array, it will be converted)
 
-Available `options`:
- - `timeout` override the default client timeout
- - `async` use this when you don't need the answer back from the server (ie: it will set `id: null`)
- - `forceArray` use this when you want the request params to be converted to an array (default: true)
- 
-### Client#use(middleware)
+##### method
+
+Type: `string`
+
+Method to call on the server.
+
+##### params
+
+Type: `object`
+
+Params to pass to the method.
+
+##### options
+
+###### timeout
+
+Type: `number`
+
+Override the default client timeout.
+
+###### async
+
+Type: `boolean`<br>
+Default: `false`
+
+Enable when you don't need the answer back from the server (ie: it will set `id: null`).
+
+###### forceArray
+
+Type: `boolean`<br>
+Default: `true`
+
+Enable when you want the request params to be converted to an array.
+
+#### use(middleware)
 
 Adds a custom middleware to the stack, allowing to customize input and even result, intercept calls or abort them completely.
+
+##### middleware
+
+Type: `function`
 
 Middleware is a function that accepts these arguments:
 
@@ -42,24 +88,13 @@ client.use(async (context, next) => {
   const startTime = new Date()
   await next()
   const duration = new Date() - startTime
-  
+
   console.log(`${context.method} spent ${duration}ms`)
 })
 
 await client.call('echo', 'Hello World')
 //=> "echo spent 2ms"
 ```
-
-## Developers
-
-Run tests locally using `make test`.
-
-Deploys happen automatically in CircleCI, so you only need to take the following steps when
-making new releasees:
-
- - bump `version` in `package.json`
- - `git-changelog -t <version>`
- - `git-release <version>`
 
 
 ## License
