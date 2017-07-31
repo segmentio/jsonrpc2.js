@@ -3,8 +3,6 @@ machine:
     version: 6
 
 dependencies:
-  cache_directories:
-     - node_modules
   override:
     - make node_modules
 
