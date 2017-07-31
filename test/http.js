@@ -58,6 +58,12 @@ test('send params without wrapping in an array', async t => {
   t.true(res.params)
 })
 
+test('send userAgent in request header', async t => {
+  const client = new Client(address, { userAgent: 'test/1.0' })
+  const res = await client.call('headers', true)
+  t.is(res['user-agent'], 'test/1.0')
+})
+
 test('throw when request fails', async t => {
   const client = new Client(address)
   await t.throws(client.call('error', []))
