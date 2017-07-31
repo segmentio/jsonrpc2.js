@@ -36,9 +36,8 @@ class Client {
       timeout: options.timeout || this.timeout,
       body
     }
-    const userAgent = options.userAgent || this.userAgent
-    if (userAgent) {
-      requestOptions.headers = { 'user-agent': userAgent }
+    if (this.userAgent) {
+      requestOptions.headers = { 'user-agent': this.userAgent }
     }
 
     request.post(this.url, requestOptions, (err, res, body) => {
