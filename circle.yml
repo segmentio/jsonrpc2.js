@@ -1,3 +1,16 @@
 machine:
   node:
     version: 6
+
+dependencies:
+  pre:
+    - nvm install 4
+    - nvm install 6
+    - nvm install 8
+    - rm -rf node_modules
+
+test:
+  override:
+    - nvm use 4; npm rebuild &> /dev/null; npm test
+    - nvm use 6; npm rebuild &> /dev/null; npm test
+    - nvm use 8; npm rebuild &> /dev/null; npm test
