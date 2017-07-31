@@ -92,6 +92,10 @@ class Client {
   }
 
   use (middleware) {
+    if (typeof middleware !== 'function') {
+      throw new TypeError(`Expected middleware to be a function, got ${typeof middleware}`)
+    }
+
     this.middleware.push(middleware)
     this.rebuildMiddleware()
   }
@@ -105,9 +109,15 @@ class Client {
   }
 
   call (method, params, options) {
+    options = Object.assign({
+      forceArray: true
+    }, options)
+
+    const forceArray = options.forceArray && !Array.isArray(params)
+
     const context = {
       method,
-      params,
+      params: forceArray ? [params] : params,
       options,
       result: null
     }
@@ -116,19 +126,14 @@ class Client {
   }
 
   callMiddleware (context) {
-    const options = Object.assign({
-      forceArray: true
-    }, context.options)
-
-    const params = context.params
     const method = context.method
-
-    const forceArray = options.forceArray && !Array.isArray(params)
+    const params = context.params
+    const options = context.options
 
     const body = {
-      params: forceArray ? [params] : params,
       jsonrpc: '2.0',
       id: options.async ? null : uid(16),
+      params,
       method
     }
 
