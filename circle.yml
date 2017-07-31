@@ -1,12 +1,3 @@
 machine:
   node:
     version: 6
-
-dependencies:
-  override:
-    - make node_modules
-
-test:
-  override:
-    - make lint
-    - make test
