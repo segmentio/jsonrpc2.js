@@ -55,7 +55,7 @@ class Client {
         return fn(err)
       }
 
-      if (typeof body.error === 'object') {
+      if (body.error) {
         const err = new Error(body.error.message)
         err.code = body.error.code
         err.data = body.error.data
