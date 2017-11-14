@@ -24,7 +24,8 @@ app.use(post('/rpc', function * () {
 
   const res = {
     jsonrpc: '2.0',
-    id
+    id,
+    error: null
   }
 
   try {
