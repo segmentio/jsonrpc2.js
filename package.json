@@ -1,6 +1,6 @@
 {
   "name": "@segment/jsonrpc2",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "JSON-RPC over HTTP/TCP client",
   "license": "MIT",
   "repository": "segmentio/jsonrpc2",
