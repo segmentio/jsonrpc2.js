@@ -22,7 +22,7 @@ function tracing (config) {
     context.options = options
     return new Promise(resolve => {
       span.finish()
-      resolve()
+      resolve(next())
     })
   }
 }
