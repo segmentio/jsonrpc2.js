@@ -54,8 +54,7 @@ class Client {
       requestOptions.headers = { 'user-agent': this.userAgent }
     }
 
-    requestOptions.uri = this.url
-    var callback = function (err, res, body) {
+    request.post(this.url, requestOptions, (err, res, body) => {
       body = body || {}
 
       if (err) {
@@ -74,14 +73,8 @@ class Client {
 
       debug('success %s: %j', options.id, body.result || {})
       fn(null, body.result)
-    }
+    })
 
-    if (this.annotateTrace) {
-      var annotated = this.annotateTrace(body.method, requestOptions, callback)
-      requestOptions = annotated.options
-      callback = annotated.callback
-    }
-    request.post(requestOptions, callback)
   }
 
   makeTCPRequest (body, options, fn) {
@@ -188,35 +181,6 @@ class Client {
     return next()
       .then(log)
       .catch(log)
-  }
-}
-
-// tracing takes a config and returns a function with the signature
-// function(name, options, [callback]) result where the result has two
-// attributes: the options and wrapped callback.  You must pass the
-// callback into the next function.
-function tracing (config) {
-  const conf = config || {}
-  const tracer = conf.tracer || opentracing.globalTracer()
-
-  return function (name, options, func) {
-    options.headers = options.headers || {}
-    var spanOpts = {}
-    if (options.span !== undefined) {
-      spanOpts = {childOf: options.span.context()}
-    }
-    var span = tracer.startSpan(name, spanOpts)
-    tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, options.headers)
-    options.span = span
-    return {
-      options: options,
-      callback: function () {
-        span.finish()
-        if (typeof func !== 'undefined') {
-          func.apply(null, arguments)
-        }
-      }
-    }
   }
 }
 

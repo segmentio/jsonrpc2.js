@@ -2,6 +2,7 @@ import http from 'http'
 import test from 'ava'
 import Client from '..'
 import app from './_app'
+import tracing from '../opentracing'
 
 let server
 let address
@@ -66,7 +67,8 @@ test('tracer wrapper', async t => {
   var started = false
   var injected = false
   var finished = false
-  const client = new Client(address, { tracer: {
+  var client = new Client(address)
+  client.use(tracing({ tracer: {
     startSpan: function () {
       started = true
       return {
@@ -74,7 +76,7 @@ test('tracer wrapper', async t => {
       }
     },
     inject: function () { injected = true }
-  }})
+  }}))
   await client.call('echo', true)
   t.is(started, true)
   t.is(injected, true)
