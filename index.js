@@ -214,7 +214,7 @@ function tracing (config) {
       callback: function () {
         span.finish()
         if (typeof func !== 'undefined') {
-          func(...arguments)
+          func.apply(null, arguments)
         }
       }
     }

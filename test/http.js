@@ -62,6 +62,25 @@ test('send userAgent in request header', async t => {
   t.is(res['user-agent'], 'test/1.0')
 })
 
+test('tracer wrapper', async t => {
+  var started = false
+  var injected = false
+  var finished = false
+  const client = new Client(address, { tracer: {
+    startSpan: function () {
+      started = true
+      return {
+        finish: function () { finished = true }
+      }
+    },
+    inject: function () { injected = true }
+  }})
+  await client.call('echo', true)
+  t.is(started, true)
+  t.is(injected, true)
+  t.is(finished, true)
+})
+
 test('throw when request fails', async t => {
   const client = new Client(address)
   await t.throws(client.call('error', []))
