@@ -34,10 +34,9 @@ class Client {
 
     if (options.tracer) {
       this.annotateTrace = tracing({
-        tracer: options.tracer,
+        tracer: options.tracer
       })
     }
-
 
     this.logMiddleware = this.logMiddleware.bind(this)
     this.callMiddleware = this.callMiddleware.bind(this)
@@ -56,7 +55,7 @@ class Client {
     }
 
     requestOptions.uri = this.url
-    var callback = function(err, res, body) {
+    var callback = function (err, res, body) {
       body = body || {}
 
       if (err) {
@@ -193,16 +192,15 @@ class Client {
   }
 }
 
-
 // tracing takes a config and returns a function with the signature
 // function(name, options, [callback]) result where the result has two
 // attributes: the options and wrapped callback.  You must pass the
 // callback into the next function.
-function tracing(config) {
+function tracing (config) {
   const conf = config || {}
   const tracer = conf.tracer || opentracing.globalTracer()
 
-  return function(name, options, callback) {
+  return function (name, options, func) {
     options.headers = options.headers || {}
     var spanOpts = {}
     if (options.span !== undefined) {
@@ -213,10 +211,10 @@ function tracing(config) {
     options.span = span
     return {
       options: options,
-      callback: function() {
+      callback: function () {
         span.finish()
-        if (typeof callback != 'undefined') {
-          callback(...arguments)
+        if (typeof func !== 'undefined') {
+          func(...arguments)
         }
       }
     }
