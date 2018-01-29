@@ -8,7 +8,6 @@ const debug = require('debug')('jsonrpc2')
 const split = require('split2')
 const once = require('once')
 const uid = require('uid2')
-const opentracing = require('opentracing')
 
 const noop = () => {}
 
@@ -31,12 +30,6 @@ class Client {
     this.logger = options.logger || noop
     this.userAgent = options.userAgent || null
     this.middleware = []
-
-    if (options.tracer) {
-      this.annotateTrace = tracing({
-        tracer: options.tracer
-      })
-    }
 
     this.logMiddleware = this.logMiddleware.bind(this)
     this.callMiddleware = this.callMiddleware.bind(this)
@@ -74,7 +67,6 @@ class Client {
       debug('success %s: %j', options.id, body.result || {})
       fn(null, body.result)
     })
-
   }
 
   makeTCPRequest (body, options, fn) {
