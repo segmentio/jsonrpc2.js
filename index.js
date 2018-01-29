@@ -77,8 +77,7 @@ class Client {
     }
 
     if (this.annotateTrace) {
-      // TODO: is body.method valid in this scope?
-      var annotated = this.annotateTrace('remote_rpc', requestOptions, callback)
+      var annotated = this.annotateTrace(body.method, requestOptions, callback)
       requestOptions = annotated.options
       callback = annotated.callback
     }
