@@ -1,3 +1,5 @@
+'use strict'
+
 const opentracing = require('opentracing')
 
 // tracing takes a config and returns a function with the signature
@@ -6,7 +8,7 @@ function tracing (config) {
   const conf = config || {}
   const tracer = conf.tracer || opentracing.globalTracer()
 
-  return async function trace (context, next) {
+  return function (context, next) {
     var options = context.options || {}
     options.headers = options.headers || {}
     var spanOpts = {}
@@ -18,8 +20,10 @@ function tracing (config) {
     tracer.inject(span, opentracing.FORMAT_HTTP_HEADERS, options.headers)
     options.span = span
     context.options = options
-    await next()
-    span.finish()
+    return new Promise(resolve => {
+      span.finish()
+      resolve()
+    })
   }
 }
 
