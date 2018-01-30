@@ -43,8 +43,10 @@ class Client {
       timeout: options.timeout || this.timeout,
       body
     }
+
+    requestOptions.headers = options.headers || {}
     if (this.userAgent) {
-      requestOptions.headers = { 'user-agent': this.userAgent }
+      Object.assign(requestOptions.headers, { 'user-agent': this.userAgent })
     }
 
     request.post(this.url, requestOptions, (err, res, body) => {
