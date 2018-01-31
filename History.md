@@ -1,4 +1,9 @@
 
+0.8.0 / 2018-01-30
+==================
+
+  * http request: support adding headers to the request from middleware
+
 0.7.0 / 2017-11-13
 ==================
 
