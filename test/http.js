@@ -2,6 +2,7 @@ import http from 'http'
 import test from 'ava'
 import Client from '..'
 import app from './_app'
+import tracing from '../opentracing'
 
 let server
 let address
@@ -60,6 +61,26 @@ test('send userAgent in request header', async t => {
   const client = new Client(address, { userAgent: 'test/1.0' })
   const res = await client.call('headers', true)
   t.is(res['user-agent'], 'test/1.0')
+})
+
+test('tracer wrapper', async t => {
+  var started = false
+  var injected = false
+  var finished = false
+  var client = new Client(address)
+  client.use(tracing({ tracer: {
+    startSpan: function () {
+      started = true
+      return {
+        finish: function () { finished = true }
+      }
+    },
+    inject: function () { injected = true }
+  }}))
+  await client.call('echo', true)
+  t.is(started, true)
+  t.is(injected, true)
+  t.is(finished, true)
 })
 
 test('throw when request fails', async t => {

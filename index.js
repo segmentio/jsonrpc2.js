@@ -38,7 +38,7 @@ class Client {
   }
 
   makeHTTPRequest (body, options, fn) {
-    const requestOptions = {
+    var requestOptions = {
       json: true,
       timeout: options.timeout || this.timeout,
       body
