@@ -1,9 +1,13 @@
-import {post} from 'koa-route'
-import json from 'koa-json-body'
-import Koa from 'koa'
+import express from 'express'
 
-const app = new Koa()
-app.use(json())
+function asyncMiddleware (fn) {
+  return (req, res, next) => {
+    return fn(req, res, next).catch(next)
+  }
+}
+
+const app = express()
+app.use(express.json())
 
 const api = {
   echo: body => body,
@@ -18,27 +22,27 @@ const api = {
   headers: (_, headers) => headers
 }
 
-app.use(post('/rpc', async function (ctx, next) {
-  const { request: { body }, headers } = ctx
+app.post('/rpc', asyncMiddleware(async function (req, res) {
+  const { body, headers } = req
   const {id, method} = body
 
-  const res = {
+  const responseBody = {
     jsonrpc: '2.0',
     id,
     error: null
   }
 
   try {
-    res.result = await api[method](body, headers)
+    responseBody.result = await api[method](body, headers)
   } catch (e) {
-    res.error = {
+    responseBody.error = {
       message: e.toString(),
       code: e.code || 0,
       data: e.data || ''
     }
   }
 
-  ctx.body = res
+  res.json(responseBody)
 }))
 
 export default app

@@ -7,7 +7,7 @@ let server
 let address
 
 test.before.cb(t => {
-  server = http.createServer(app.callback())
+  server = http.createServer(app)
   server.listen(() => {
     const port = server.address().port
     address = `http://localhost:${port}/rpc`
