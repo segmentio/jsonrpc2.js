@@ -1,8 +1,8 @@
 import {post} from 'koa-route'
 import json from 'koa-json-body'
-import koa from 'koa'
+import Koa from 'koa'
 
-const app = koa()
+const app = new Koa()
 app.use(json())
 
 const api = {
@@ -11,15 +11,15 @@ const api = {
     throw new Error('boom!')
   },
   sleep: ({params}) => {
-    return done => {
-      setTimeout(done, params[0].time)
-    }
+    return new Promise((resolve) => {
+      setTimeout(resolve, params[0].time)
+    })
   },
   headers: (_, headers) => headers
 }
 
-app.use(post('/rpc', function * () {
-  const { body, headers } = this.request
+app.use(post('/rpc', async function (ctx, next) {
+  const { request: { body }, headers } = ctx
   const {id, method} = body
 
   const res = {
@@ -29,7 +29,7 @@ app.use(post('/rpc', function * () {
   }
 
   try {
-    res.result = yield api[method](body, headers)
+    res.result = await api[method](body, headers)
   } catch (e) {
     res.error = {
       message: e.toString(),
@@ -38,7 +38,7 @@ app.use(post('/rpc', function * () {
     }
   }
 
-  this.body = res
+  ctx.body = res
 }))
 
 export default app
