@@ -1,0 +1,50 @@
+version: 2
+jobs:
+  node4:
+    working_directory: ~/jsonrpc2
+    docker:
+      - image: node:4
+    steps:
+      - checkout
+      - run: npm version
+      - run: npm install
+      - run: npm test
+
+  node6:
+    working_directory: ~/jsonrpc2
+    docker:
+      - image: node:6
+    steps:
+      - checkout
+      - run: npm version
+      - run: npm install
+      - run: npm test
+
+  node8:
+    working_directory: ~/jsonrpc2
+    docker:
+      - image: node:8
+    steps:
+      - checkout
+      - run: npm version
+      - run: npm install
+      - run: npm test
+
+  node10:
+    working_directory: ~/jsonrpc2
+    docker:
+      - image: node:10
+    steps:
+      - checkout
+      - run: npm version
+      - run: npm install
+      - run: npm test
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - node4
+      - node6
+      - node8
+      - node10
