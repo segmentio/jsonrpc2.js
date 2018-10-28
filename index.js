@@ -57,13 +57,17 @@ class Client {
         return fn(err)
       }
 
-      if (body.error && typeof body.error === 'object') {
-        const err = new Error(body.error.message)
-        err.code = body.error.code
-        err.data = body.error.data
+      if (body.error) {
+        let err = new Error(body.error);
 
-        debug('error %s: %s', options.id, err.message)
-        return fn(err)
+        if (typeof body.error === "object") {
+          err = new Error(body.error.message);
+          err.code = body.error.code;
+          err.data = body.error.data;
+        }
+
+        debug("error %s: %s", options.id, err.message);
+        return fn(err);
       }
 
       debug('success %s: %j', options.id, body.result || {})
