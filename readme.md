@@ -2,6 +2,11 @@
 
 > A [JSON-RPCv2](http://www.jsonrpc.org/specification) client.
 
+## Install
+
+```sh
+yarn add @segment/jsonrpc2
+```
 
 ## API
 
