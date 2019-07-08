@@ -82,7 +82,7 @@ class Client {
     socket
       .on('timeout', () => {
         socket.end()
-        const errorMessage = `Request timedout. Hostname: ${this.hostname}`
+        const errorMessage = `Request timed out. Hostname: ${this.hostname}`
         const err = new Error(errorMessage)
         err.code = 'ETIMEDOUT'
 
