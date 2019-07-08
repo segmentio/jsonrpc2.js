@@ -80,6 +80,14 @@ class Client {
     socket.setTimeout(options.timeout || this.timeout)
 
     socket
+      .on('timeout', () => {
+        socket.end()
+        const errorMessage = `Request timedout. Hostname: ${this.hostname}`
+        const err = new Error(errorMessage)
+        err.code = 'ETIMEDOUT'
+
+        fn(err)
+      })
       .on('error', fn)
       .pipe(split(JSON.parse))
       .on('data', data => {
