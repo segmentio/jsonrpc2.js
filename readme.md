@@ -1,5 +1,8 @@
 # @segment/jsonrpc2.js [![Circle CI](https://circleci.com/gh/segmentio/jsonrpc2.js.svg?style=svg&circle-token=2f500aa32b45326a85290a0b005412a1b283f813)](https://circleci.com/gh/segmentio/jsonrpc2.js)
 
+> [!NOTE]
+> Segment has paused maintenance on this project, but may return it to an active status in the future. Issues and pull requests from external contributors are not being considered, although internal contributions may appear from time to time. The project remains available under its open source license for anyone to use.
+
 > A [JSON-RPCv2](http://www.jsonrpc.org/specification) client.
 
 ## Install
