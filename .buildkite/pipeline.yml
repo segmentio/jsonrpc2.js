@@ -1,0 +1,49 @@
+agents:
+  queue: general-039
+
+steps:
+  - label: ":nodejs: Test"
+    plugins:
+      - twilio-internal/admiral-secret:
+          realm: corp-us1
+          secrets:
+            - key-full: NPM_ARTIFACTORY_SECRET
+              secret-name: jobs_jenkins_npm_credentials
+      - twilio-internal/npm-artifactory#ajacobs/support-other-orgs:
+          secret-name: "NPM_ARTIFACTORY_SECRET"
+          scope: "@segment"
+      - docker#v5.13.0:
+          image: "018537234677.dkr.ecr.us-east-1.amazonaws.com/docker.io/library/node:24.4.1-bookworm"
+          propagate-environment: true
+          mount-buildkite-agent: true
+    commands: |
+      echo '--- Setting default registry for unscoped deps'
+      printf 'registry=https://npmjs.artifacts.twilio.com/artifactory/api/npm/virtual-npm-twilio/\nalways-auth=true\n' >> .npmrc
+
+      echo '--- Fetching dependencies'
+      npm install
+
+      echo '--- Testing'
+      npm test
+
+  - label: ":rocket: Publish"
+    if: build.tag =~ /^v[0-9]+(\.[0-9]+)*(-.+)?$/
+    plugins:
+      - twilio-internal/admiral-secret:
+          realm: corp-us1
+          secrets:
+            - key-full: NPM_ARTIFACTORY_SECRET
+              secret-name: jobs_jenkins_npm_credentials
+      - twilio-internal/npm-artifactory#ajacobs/support-other-orgs:
+          secret-name: "NPM_ARTIFACTORY_SECRET"
+          scope: "@segment"
+      - docker#v5.13.0:
+          image: "018537234677.dkr.ecr.us-east-1.amazonaws.com/docker.io/library/node:24.4.1-bookworm"
+          propagate-environment: true
+          mount-buildkite-agent: true
+    commands: |
+      echo '--- Setting default registry'
+      printf 'registry=https://npmjs.artifacts.twilio.com/artifactory/api/npm/virtual-npm-twilio/\nalways-auth=true\n' >> .npmrc
+
+      echo '--- Publishing to Artifactory'
+      npm publish .

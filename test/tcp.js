@@ -1,7 +1,7 @@
-import {spy} from 'sinon'
-import test from 'ava'
-import net from 'net'
-import Client from '..'
+const { spy } = require('sinon')
+const test = require('ava')
+const net = require('net')
+const Client = require('..')
 
 test('call', async t => {
   const handleCall = spy((socket, data) => {
@@ -27,9 +27,11 @@ test('call', async t => {
 
   t.true(handleCall.calledOnce)
   t.is(result, 42)
+
+  await new Promise(resolve => server.close(resolve))
 })
 
 test('connection error', async t => {
   const client = new Client('tcp://not-found:23424')
-  await t.throws(client.call('Foo.Bar', 12))
+  await t.throwsAsync(client.call('Foo.Bar', 12))
 })

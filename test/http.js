@@ -1,23 +1,27 @@
-import http from 'http'
-import test from 'ava'
-import Client from '..'
-import app from './_app'
+const http = require('http')
+const test = require('ava')
+const Client = require('..')
+const app = require('./_app')
 
 let server
 let address
 
-test.before.cb(t => {
-  server = http.createServer(app)
-  server.listen(() => {
-    const port = server.address().port
-    address = `http://localhost:${port}/rpc`
+test.before(t => {
+  return new Promise(resolve => {
+    server = http.createServer(app)
+    server.listen(() => {
+      const port = server.address().port
+      address = `http://localhost:${port}/rpc`
 
-    t.end()
+      resolve()
+    })
   })
 })
 
-test.after.cb(t => {
-  server.close(t.end)
+test.after(t => {
+  return new Promise(resolve => {
+    server.close(resolve)
+  })
 })
 
 test('generate a unique id', async t => {
@@ -64,18 +68,18 @@ test('send userAgent in request header', async t => {
 
 test('throw when request fails', async t => {
   const client = new Client(address)
-  await t.throws(client.call('error', []))
+  await t.throwsAsync(client.call('error', []))
 })
 
 test('timeout', async t => {
   const client = new Client(address, { timeout: 50 })
-  const err = await t.throws(client.call('sleep', { time: 100 }))
+  const err = await t.throwsAsync(client.call('sleep', { time: 100 }))
   t.is(err.code, 'ESOCKETTIMEDOUT')
 })
 
 test('per-request timeout', async t => {
   const client = new Client(address)
-  const err = await t.throws(client.call('sleep', { time: 100 }, { timeout: 50 }))
+  const err = await t.throwsAsync(client.call('sleep', { time: 100 }, { timeout: 50 }))
   t.is(err.code, 'ESOCKETTIMEDOUT')
 })
 

@@ -1,4 +1,4 @@
-import express from 'express'
+const express = require('express')
 
 function asyncMiddleware (fn) {
   return (req, res, next) => {
@@ -14,7 +14,7 @@ const api = {
   error: () => {
     throw new Error('boom!')
   },
-  sleep: ({params}) => {
+  sleep: ({ params }) => {
     return new Promise((resolve) => {
       setTimeout(resolve, params[0].time)
     })
@@ -24,7 +24,7 @@ const api = {
 
 app.post('/rpc', asyncMiddleware(async function (req, res) {
   const { body, headers } = req
-  const {id, method} = body
+  const { id, method } = body
 
   const responseBody = {
     jsonrpc: '2.0',
@@ -45,4 +45,4 @@ app.post('/rpc', asyncMiddleware(async function (req, res) {
   res.json(responseBody)
 }))
 
-export default app
+module.exports = app

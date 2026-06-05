@@ -1,6 +1,6 @@
 'use strict'
 
-const parseUrl = require('url').parse
+const parseUrl = require('url').parse // eslint-disable-line n/no-deprecated-api
 const net = require('net')
 const request = require('request')
 const compose = require('koa-compose')

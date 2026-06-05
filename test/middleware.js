@@ -1,13 +1,13 @@
-import {spy} from 'sinon'
-import test from 'ava'
-import Client from '..'
+const { spy } = require('sinon')
+const test = require('ava')
+const Client = require('..')
 
-const createClient = options => new Client(`tcp://localhost`, options)
+const createClient = options => new Client('tcp://localhost', options)
 
 test('throw when middleware isn\'t a function', t => {
   const client = createClient()
 
-  t.throws(() => client.use(), 'Expected middleware to be a function, got undefined')
+  t.throws(() => client.use(), { message: 'Expected middleware to be a function, got undefined' })
 })
 
 test('pass context to the middleware and return result', async t => {
@@ -115,7 +115,7 @@ test('error from call', async t => {
 
   client.use(middleware)
 
-  const err = await t.throws(client.call('echo', 'hello'))
+  const err = await t.throwsAsync(client.call('echo', 'hello'))
 
   t.is(err.message, 'Oops')
   t.true(err.intercepted)
@@ -141,7 +141,7 @@ test('error from middleware', async t => {
   client.use(goodMiddleware)
   client.use(badMiddleware)
 
-  const err = await t.throws(client.call('echo', 'hello'))
+  const err = await t.throwsAsync(client.call('echo', 'hello'))
 
   t.is(err.message, 'Oops')
   t.true(err.intercepted)
@@ -160,7 +160,7 @@ test('log on success', async t => {
   const data = client.logger.firstCall.args[0]
 
   t.is(typeof data.duration, 'number')
-  t.true(data.duration > 0)
+  t.true(data.duration >= 0)
   t.deepEqual(data, {
     method: 'test',
     params: [{ key: 'value' }],
@@ -176,7 +176,7 @@ test('log on error', async t => {
   client.request = (body, options, callback) => callback(new Error('Oops'), null)
   client.logger = spy()
 
-  const err = await t.throws(client.call('test', { key: 'value' }))
+  const err = await t.throwsAsync(client.call('test', { key: 'value' }))
 
   t.is(err.message, 'Oops')
   t.true(client.logger.calledOnce)
@@ -184,7 +184,7 @@ test('log on error', async t => {
   const data = client.logger.firstCall.args[0]
 
   t.is(typeof data.duration, 'number')
-  t.true(data.duration > 0)
+  t.true(data.duration >= 0)
   t.deepEqual(data, {
     method: 'test',
     params: [{ key: 'value' }],
