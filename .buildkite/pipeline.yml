@@ -9,7 +9,7 @@ steps:
           secrets:
             - key-full: NPM_ARTIFACTORY_SECRET
               secret-name: jobs_jenkins_npm_credentials
-      - twilio-internal/npm-artifactory#ajacobs/support-other-orgs:
+      - twilio-internal/npm-artifactory#v1.1.0:
           secret-name: "NPM_ARTIFACTORY_SECRET"
           scope: "@segment"
       - docker#v5.13.0:
@@ -34,7 +34,7 @@ steps:
           secrets:
             - key-full: NPM_ARTIFACTORY_SECRET
               secret-name: jobs_jenkins_npm_credentials
-      - twilio-internal/npm-artifactory#ajacobs/support-other-orgs:
+      - twilio-internal/npm-artifactory#v1.1.0:
           secret-name: "NPM_ARTIFACTORY_SECRET"
           scope: "@segment"
       - docker#v5.13.0:
